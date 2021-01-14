@@ -1,0 +1,139 @@
+#Group of my friends were very interested in finding out what salaries people would usually earn depending on their colleges and degrees. 
+#Therefore, we had decided to use the dataset from Kaggle (https://www.kaggle.com/wsj/college-salaries) to analyse the salaries by different colleges and degrees. 
+
+#Regression tree for different major
+install.packages("tree")
+library(tree)
+setwd("~/Desktop/working dictionary/final proje t 2/college-salaries")
+major=read.csv("major.csv")
+attach(major)
+View(major)
+tree.major=tree(Starting.Median.Salary~Undergraduate.Major,data=major)
+summary(tree.major)
+plot(tree.major)
+text(tree.major,pretty=0)
+
+tree.major=tree(Mid.Career.Median.Salary~Undergraduate.Major,data=major)
+plot(tree.major)
+text(tree.major,pretty=0)
+
+
+#Regression tree for school type
+library(tree)
+setwd("~/Desktop/working dictionary/final proje t 2/college-salaries")
+type=read.csv("type.csv")
+attach(type)
+names(type)
+table(type$Starting.Median.Salary)
+contrasts(School.Type)
+tree1 = tree(Starting.Median.Salary ~ School.Type , data = type)
+summary(tree1)
+plot(tree1)
+text(tree1)
+
+tree1 = tree(Mid.Career.Median.Salary ~ School.Type , data = type)
+summary(tree1)
+plot(tree1)
+text(tree1)
+
+#Regression tree for region
+region=read.csv("region.csv")
+attach(region)
+names(region)
+table(region$Starting.Median.Salary)
+contrasts(Region)
+tree2 = tree(Starting.Median.Salary ~ Region, data = region)
+summary(tree2)
+plot(tree2)
+text(tree2)
+
+tree2 = tree(Mid.Career.Median.Salary ~ Region, data = region)
+summary(tree2)
+plot(tree2)
+text(tree2)
+
+#Scatter plots and bar charts 
+# Install libraries
+library(ggplot2)
+library(gridExtra)
+# Display the name and number of row and column of major
+names(major)
+dim(major)
+# Plot the scatter plot and bar chart for major vs. starting median salary
+major$Undergraduate.Major = factor(major$Undergraduate.Major, levels = major[order(major$Starting.Median.Salary), "Undergraduate.Major"])
+x = ggplot(major, aes(y = Undergraduate.Major, x = Starting.Median.Salary)) + geom_point(stat = "identity")
+y = ggplot(major, aes(x = Undergraduate.Major, y = Starting.Median.Salary)) + geom_bar(stat = "identity") +
+  coord_flip()
+grid.arrange(x, y, ncol = 2)
+# Create a new column "change"
+major["change"] <- NA
+major$change = major$Mid.Career.90th.Percentile.Salary - major$Mid.Career.10th.Percentile.Salary
+sort.change=major[order(major$change),]
+sort.change
+# Plot the scatter plot and bar chart for major vs. change
+x = ggplot(major, aes(y = Undergraduate.Major, x = change)) + geom_point(stat = "identity")
+y = ggplot(major, aes(x = Undergraduate.Major, y = change)) + geom_bar(stat = "identity") +
+  coord_flip()
+grid.arrange(x, y, ncol = 2)
+
+#Box plots 
+
+install.packages("dplyr")
+install.packages("ggplot2")
+library(ggplot2)
+library(dplyr)
+
+#Starting Meidan salary diffence by school type
+salaries = salaries_by_college_type2
+ggplot(salaries, aes(x = `School Type`, y = `Starting Median Salary`)) + 
+  geom_boxplot(outlier.color = "red", outlier.shape = 8, outlier.size = 4) + 
+  ggtitle("Starting median Salaries by school type") + 
+  xlab("School type") + ylab("Starting median salary") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Mid-career Meidan salary diffence by school type
+ggplot(salaries, aes(x = `School Type`, y = `Mid-Career Median Salary`)) + 
+  geom_boxplot(outlier.color = "red", outlier.shape = 8, outlier.size = 4) + 
+  ggtitle("Mid career median Salaries by school type") + 
+  xlab("School type") + ylab("Mid career median salary") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Starting median salary difference by region
+salariesRegion = salaries_by_region2
+attach(salariesRegion)
+ggplot(salariesRegion, aes(x = Region, y = `Starting Median Salary`)) + 
+  geom_boxplot(outlier.color = "red", outlier.shape = 8, outlier.size = 4) + 
+  ggtitle("Starting median Salaries by region") + 
+  xlab("Region") + ylab("Starting median salary") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Mid-career median salary difference by region
+ggplot(salariesRegion, aes(x = Region, y = `Mid-Career Median Salary`)) + 
+  geom_boxplot(outlier.color = "red", outlier.shape = 8, outlier.size = 4) + 
+  ggtitle("Mid-career median Salaries by region") + 
+  xlab("Region") + ylab("Starting median salary") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Top majors that have highest increasing rate
+salarysByMajor = degrees_that_pay_back2
+attach(salarysByMajor)
+salaryIncrease = salarysByMajor[c(1,2,3,4)]
+toprated = salaryIncrease %>% arrange(desc(`Percent change from Starting 
+                                            to Mid-Career Salary`)) %>% top_n(10)
+
+
+
+ggplot(toprated, aes(x=`Undergraduate Major`,y=
+                       `Percent change from Starting to Mid-Career Salary`))+geom_col() +
+  ggtitle("Pencent change from Starting to Mid-Career Salray")+
+  theme(axis.text = element_text(size=12), plot.title = element_text(hjust = 0.5)) +
+  order(decreasing = TRUE)
+t.test(x = `Starting Median Salary`,y = `Mid-Career Median Salary`, data = salaryIncrease2)
+#t.test(a ~  b , data = salariesIncrease2)
+#p is value you assume under the null
+#prop.test(x = 59, n = 423, p = 0.20,  conf. level = 0.95)
+
+#ggplot aes() + geom_bar(position = "dodge", "fill")
+
+#Project was done by Jee Hun Kang,Linda Hackenberg, Geonwoo Seo, Joseph Jeu, Jung Yeon Kim, Ki Yuen Cheung
+
